@@ -1,3 +1,16 @@
+/*
+Events :
+
+addItem
+itemAdded
+
+addCategory
+removeCategory
+updateCategories
+
+*/
+
+
 const _Event = (eventName) => {
     let name = eventName;
     let handlers = [];
