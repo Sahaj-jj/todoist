@@ -48,6 +48,10 @@ const CategoryController = (() => {
 UI.init();
 CategoryController.init();
 
+PubSub.publish('addCategory', 'All');
+PubSub.publish('addCategory', 'Random');
+PubSub.publish('addCategory', 'Categories');
+
 
 
 
