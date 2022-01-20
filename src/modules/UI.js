@@ -3,7 +3,7 @@ import PubSub from "./pubsub";
 const UI = (() => {
 
     /*
-    Categories
+    Categories UI
     */
 
     const $categoryContainer = document.querySelector('.category-container');
@@ -60,7 +60,7 @@ const UI = (() => {
 
 
     /*
-    Items
+    Items UI
     */
     
     const $itemContainer = document.querySelector('.item-container');
@@ -74,15 +74,14 @@ const UI = (() => {
     }
 
     const showItems = (items) => {
-        // Clear contents
         while($itemContainer.childElementCount > 0) 
-            $itemContainer.lastChild.remove();
+            $itemContainer.lastChild.remove();  // Clear contents
 
-        items.map(item => addItem(item));
+        items.map(item => addItemDOM(item));
 
     }
 
-    const addItem = (item) => {
+    const addItemDOM = (item) => {
         $itemContainer.appendChild(newItem(item));
         //addItemListener(item);
     }
@@ -104,8 +103,8 @@ const UI = (() => {
 
         PubSub.subscribe('categoryAdded', addCategory);
 
-        PubSub.subscribe('showItems', showItems);
-        PubSub.subscribe('itemAdded', addItem);
+        PubSub.subscribe('categoryItemsLoaded', showItems);
+        PubSub.subscribe('itemAdded', addItemDOM);
     }
 
     return {

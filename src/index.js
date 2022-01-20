@@ -2,16 +2,6 @@ import PubSub from "./modules/pubsub";
 import UI from "./modules/UI";
 import Category from "./modules/category"
 
-// function test() {
-//     const cat = Category('hi');
-
-//     PubSub.subscribe('addItem', cat.addItem);
-//     PubSub.publish('addItem', 'test');
-// }
-
-// test();
-
-
 const CategoryController = (() => {
 
     // Category
@@ -41,7 +31,7 @@ const CategoryController = (() => {
 
     const getItems = (categoryName) => {
         const items = getCategory(categoryName).getItems();
-        PubSub.publish('showItems', items);
+        PubSub.publish('categoryItemsLoaded', items);
     }
 
     const addItem = (itemInfoObj) => {
