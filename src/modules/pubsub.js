@@ -6,7 +6,8 @@ itemAdded
 
 addCategory
 removeCategory
-updateCategories
+categoryAdded
+categoryRemoved
 
 */
 

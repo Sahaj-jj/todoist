@@ -17,9 +17,9 @@ const UI = (() => {
         return element;
     }
 
-    const newCategory = (categoryName) => {
+    const newCategory = (category) => {
         const $cat = createHtmlElement('div', ['category']);
-        $cat.appendChild(createHtmlElement('div', ['text'], categoryName));
+        $cat.appendChild(createHtmlElement('div', ['text'], category.getName()));
         $cat.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $cat;
     }
@@ -47,14 +47,14 @@ const UI = (() => {
     }
 
     const addCategory = (cat) => {
-        const $newCategory = newCategory(cat.getName());
+        const $newCategory = newCategory(cat);
         $categoryContainer.appendChild($newCategory);
         addCategoryListener(cat);
         setActive($newCategory, cat.getName());
     }
 
-    const removeCategory = (catElement, categoryName) => {
-        catElement.remove();
+    const removeCategory = ($category, categoryName) => {
+        $category.remove();
         PubSub.publish('removeCategory', categoryName);
     }
 
@@ -66,8 +66,11 @@ const UI = (() => {
     const $itemContainer = document.querySelector('.item-container');
     const $addItemBtn = document.querySelector('.add-item');
 
-    const newItem = (item) => {
+    const newItemDOM = (item) => {
         const $item = createHtmlElement('div', ['item']);
+        const $checkBox = document.createElement('input');
+        $checkBox.type = 'checkbox';
+        $item.appendChild($checkBox);
         $item.appendChild(createHtmlElement('div', ['text'], item.content));
         $item.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $item;
@@ -82,7 +85,7 @@ const UI = (() => {
     }
 
     const addItemDOM = (item) => {
-        $itemContainer.appendChild(newItem(item));
+        $itemContainer.appendChild(newItemDOM(item));
         //addItemListener(item);
     }
 
