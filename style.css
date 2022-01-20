@@ -17,12 +17,12 @@ body {
     height: 100vh;
 }
 
+/* Categories */
+
 .left-container {
     width: 20%;
     background-color: var(--left-container);
 }
-
-/* Categories */
 
 .category-container {
     margin: 70px 0 20px;
@@ -73,4 +73,22 @@ body {
 
 .add-category:hover {
     transform: scale(1.2);
+}
+
+/* Items */
+
+.right-container {
+    background-color: beige;
+    width: 80%;
+}
+
+.item-container {
+    background-color: aqua;
+    margin: 100px 100px 20px;
+}
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 30px;
 }
