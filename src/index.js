@@ -14,6 +14,8 @@ import Category from "./modules/category"
 
 const CategoryController = (() => {
 
+    // Category
+
     const categories = [];
 
     const getCategory = (categoryName) => {
@@ -35,9 +37,25 @@ const CategoryController = (() => {
         categories.splice(index, 1);
     }
 
+    // Items
+
+    const getItems = (categoryName) => {
+        const items = getCategory(categoryName).getItems();
+        PubSub.publish('showItems', items);
+    }
+
+    const addItem = (itemInfoObj) => {
+        const activeCat = getCategory(itemInfoObj.activeCategoryName);
+        const item = activeCat.addItem(itemInfoObj.itemContent);
+        PubSub.publish('itemAdded', item);
+    }
+
     const init = () => {
         PubSub.subscribe('addCategory', addCategory);
-        PubSub.subscribe('categoryRemoved', removeCategory);
+        PubSub.subscribe('removeCategory', removeCategory);
+
+        PubSub.subscribe('categoryActive', getItems);
+        PubSub.subscribe('addItem', addItem);
     }
 
     return {

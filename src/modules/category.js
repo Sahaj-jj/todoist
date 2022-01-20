@@ -14,17 +14,21 @@ const Category = (categoryName) => {
     const getName = () => name;
 
     const addItem = (itemContent) => {
-        items.push(Item(items.length, itemContent));
-        PubSub.publish('itemAdded', items.slice(-1));
+        const item = Item(0, itemContent);
+        items.push(item);
+        return item;
     }
 
     // const removeItem = (item) => {
     //     
     // }
 
+    const getItems = () => items;
+
     return {
         getName,
         addItem,
+        getItems,
     };
 }
 
