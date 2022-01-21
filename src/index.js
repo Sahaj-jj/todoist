@@ -13,6 +13,7 @@ const CategoryController = (() => {
     }
     
     const addCategory = (categoryName) => {
+        console.log(categoryName);
         if (getCategory(categoryName)) {
             alert('This category already exists!');
             return;

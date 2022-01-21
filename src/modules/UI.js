@@ -24,6 +24,8 @@ const UI = (() => {
     const $categoryContainer = document.querySelector('.category-container');
     const $addCategoryBtn = document.querySelector('.add-category');
     const $categoryInput = document.querySelector('.left-container .input-container');
+    let $input, $okBtn, $cancelBtn;
+    [$input, $okBtn, $cancelBtn] = $categoryInput.children;
     const $activeCategory = document.getElementById('active-category');
     let $currentActive = null;
 
@@ -72,24 +74,19 @@ const UI = (() => {
     }
 
     const inputCategory = () => {
-        let $input, $okBtn, $cancelBtn;
-        [$input, $okBtn, $cancelBtn] = $categoryInput.children;
-
         $categoryInput.style.display = 'flex';
         $addCategoryBtn.style.display = 'none';
         $input.value = '';
         $input.focus();
 
-        $okBtn.addEventListener('click', () => {
-            PubSub.publish('addCategory', $input.value);
-            $categoryInput.style.display = 'none';
-            $addCategoryBtn.style.display = 'block';
-        }, {once: true});
-
-        $cancelBtn.addEventListener('click', () => {
-            $categoryInput.style.display = 'none';
-            $addCategoryBtn.style.display = 'block'
-        }, {once: true});
+    }
+    const loadInput = () => {
+        PubSub.publish('addCategory', $input.value);
+        reset();
+    }
+    const resetInput = () => {
+        $categoryInput.style.display = 'none';
+        $addCategoryBtn.style.display = 'block';
     }
 
     /*
@@ -156,10 +153,10 @@ const UI = (() => {
 
     const init = () => {
         // Categories
-        $addCategoryBtn.addEventListener('click', () => {
-            inputCategory();
-        })
+        $addCategoryBtn.addEventListener('click', inputCategory);
         PubSub.subscribe('categoryAdded', addCategoryDOM);
+        $okBtn.addEventListener('click', loadInput);
+        $cancelBtn.addEventListener('click', resetInput);
 
         // Items
         $addItemBtn.addEventListener('click', () => {
@@ -181,7 +178,6 @@ const UI = (() => {
 
     return {
         init,
-        setActive,
     };
 })();
 
