@@ -110,14 +110,15 @@ body {
     font-size: 0.85em;
     border-bottom: 1px solid var(--item-border);
     gap: 10px;
+    position: relative;
 }
 
 .item.done {
     opacity: 50%;
 }
 
-.item .text {
-    flex-grow: 1;
+.item .tag {
+    background-color: brown;
 }
 
 .add-item {
@@ -129,5 +130,7 @@ body {
 
 .item .delete {
     cursor: pointer;
+    position: absolute;
+    right: 0;
 }
 

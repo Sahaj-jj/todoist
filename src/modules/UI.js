@@ -63,10 +63,11 @@ const UI = (() => {
     }
 
     const removeCategoryDOM = ($category) => {
-        if ($category == $currentActive) 
-            setActive($categoryContainer.firstElementChild);
-        $category.remove();
         PubSub.publish('removeCategory', getCategoryName($category));
+        const $firstCategory = $categoryContainer.firstElementChild;
+        if ($category == $currentActive || $currentActive == $firstCategory) 
+            setActive($firstCategory);
+        $category.remove();
     }
 
     /*
@@ -86,6 +87,9 @@ const UI = (() => {
         }
         $item.appendChild($checkBox);
         $item.appendChild(createHtmlElement('div', ['text'], item.content));
+        if ($currentActive == $categoryContainer.firstElementChild) {
+            $item.appendChild(createHtmlElement('div', ['tag'], getCategoryName($item)));
+        }
         $item.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $item;
     }
