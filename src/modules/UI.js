@@ -23,6 +23,7 @@ const UI = (() => {
 
     const $categoryContainer = document.querySelector('.category-container');
     const $addCategoryBtn = document.querySelector('.add-category');
+    const $activeCategory = document.getElementById('active-category');
     let $currentActive = null;
 
     const newCategory = (category) => {
@@ -42,17 +43,16 @@ const UI = (() => {
             removeCategoryDOM($deleteBtn.parentNode);
         })
 
-        $category.addEventListener('click', () => {
-            setActive($category);
-        })
+        $category.addEventListener('click', () => setActive($category));
     }
 
     const setActive = ($category) => {
         if ($currentActive) $currentActive.classList.remove('active');
-            $category.classList.add('active');
-            $currentActive = $category;
-        
-        PubSub.publish('categoryActive', getCategoryName($category));
+        $category.classList.add('active');
+        $currentActive = $category;
+        const categoryName = getCategoryName($category);
+        $activeCategory.textContent = categoryName;
+        PubSub.publish('categoryActive', categoryName);
     }
 
     const addCategoryDOM = (category) => {
@@ -80,6 +80,10 @@ const UI = (() => {
         const $item = createHtmlElement('div', ['item']);
         const $checkBox = document.createElement('input');
         $checkBox.type = 'checkbox';
+        if (item.isDone) {
+            $item.classList.add('done');
+            $checkBox.checked = true;
+        }
         $item.appendChild($checkBox);
         $item.appendChild(createHtmlElement('div', ['text'], item.content));
         $item.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
@@ -98,10 +102,10 @@ const UI = (() => {
         const itemElements = Array.from($item.children);
         const itemContent = itemElements.find(el => el.classList.contains('text')).textContent;
         const $deleteBtn = itemElements.find(el => el.classList.contains('delete'));
+        const $checkBox = itemElements.find(el => el.type == 'checkbox');
         
-        $deleteBtn.addEventListener('click', () => {
-            removeItemDOM($deleteBtn.parentNode, itemContent);
-        })
+        $deleteBtn.addEventListener('click', () => removeItemDOM($item, itemContent));
+        $checkBox.addEventListener('click', () => toggleDoneDOM($checkBox, itemContent));
     }
 
     const addItemDOM = (item) => {
@@ -114,6 +118,12 @@ const UI = (() => {
         $item.remove();
         PubSub.publish('removeItem', {activeCategoryName: getCategoryName($currentActive), itemContent});
     }
+
+    const toggleDoneDOM = ($checkBox, itemContent) => {
+        const $item = $checkBox.parentNode;
+        $checkBox.checked ? $item.classList.add('done') : $item.classList.remove('done');
+        PubSub.publish('toggleDone', {activeCategoryName: getCategoryName($currentActive),itemContent, isDone: $checkBox.checked});
+    } 
 
     const init = () => {
         // Categories

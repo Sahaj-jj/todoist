@@ -30,19 +30,28 @@ const CategoryController = (() => {
     // Items
 
     const getItems = (categoryName) => {
-        const items = getCategory(categoryName).getItems();
+        let items = [];
+        if (categoryName === categories[0].getName()) {
+            categories.map(cat => {
+                //console.log(cat.getItems());
+                cat.getItems().map(item => items.push(item));
+            });
+        }
+        else items = getCategory(categoryName).getItems();
         PubSub.publish('categoryItemsLoaded', items);
     }
 
     const addItem = ({activeCategoryName, itemContent}) => {
-        const activeCat = getCategory(activeCategoryName);
-        const item = activeCat.addItem(itemContent);
-        if (activeCat != categories[0]) categories[0].addItem(itemContent); // Add to Home
+        const item = getCategory(activeCategoryName).addItem(itemContent); // Add to Home
         PubSub.publish('itemAdded', item);
     }
 
     const removeItem = ({activeCategoryName, itemContent}) => {
         getCategory(activeCategoryName).removeItem(itemContent);
+    }
+
+    const toggleDone = ({activeCategoryName, itemContent}) => {
+        getCategory(activeCategoryName).toggleDone(itemContent);
     }
 
     const init = () => {
@@ -52,6 +61,7 @@ const CategoryController = (() => {
         PubSub.subscribe('categoryActive', getItems);
         PubSub.subscribe('addItem', addItem);
         PubSub.subscribe('removeItem', removeItem);
+        PubSub.subscribe('toggleDone', toggleDone);
     }
 
     return {
