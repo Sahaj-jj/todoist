@@ -34,10 +34,15 @@ const CategoryController = (() => {
         PubSub.publish('categoryItemsLoaded', items);
     }
 
-    const addItem = (itemInfoObj) => {
-        const activeCat = getCategory(itemInfoObj.activeCategoryName);
-        const item = activeCat.addItem(itemInfoObj.itemContent);
+    const addItem = ({activeCategoryName, itemContent}) => {
+        const activeCat = getCategory(activeCategoryName);
+        const item = activeCat.addItem(itemContent);
+        if (activeCat != categories[0]) categories[0].addItem(itemContent); // Add to Home
         PubSub.publish('itemAdded', item);
+    }
+
+    const removeItem = ({activeCategoryName, itemContent}) => {
+        getCategory(activeCategoryName).removeItem(itemContent);
     }
 
     const init = () => {
@@ -46,6 +51,7 @@ const CategoryController = (() => {
 
         PubSub.subscribe('categoryActive', getItems);
         PubSub.subscribe('addItem', addItem);
+        PubSub.subscribe('removeItem', removeItem);
     }
 
     return {
@@ -56,9 +62,7 @@ const CategoryController = (() => {
 CategoryController.init();
 UI.init();
 
-PubSub.publish('addCategory', 'All');
-PubSub.publish('addCategory', 'Random');
-PubSub.publish('addCategory', 'Categories');
+
 
 
 

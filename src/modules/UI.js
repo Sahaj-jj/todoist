@@ -3,12 +3,8 @@ import PubSub from "./pubsub";
 const UI = (() => {
 
     /*
-    Categories UI
+    Util
     */
-
-    const $categoryContainer = document.querySelector('.category-container');
-    const $addCategoryBtn = document.querySelector('.add-category');
-    let $currentActive = null;
 
     const createHtmlElement = (type, classArray = null, content = null) => {
         const element = document.createElement(type);
@@ -17,47 +13,61 @@ const UI = (() => {
         return element;
     }
 
+    const getCategoryName = ($category) => {
+        return $category.classList.value.split(' ')[0];
+    }
+
+    /*
+    Categories UI
+    */
+
+    const $categoryContainer = document.querySelector('.category-container');
+    const $addCategoryBtn = document.querySelector('.add-category');
+    let $currentActive = null;
+
     const newCategory = (category) => {
-        const $cat = createHtmlElement('div', ['category']);
+        const $cat = createHtmlElement('div', [category.getName(), 'category']);
         $cat.appendChild(createHtmlElement('div', ['text'], category.getName()));
-        $cat.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
+        if ($categoryContainer.childElementCount != 0)
+            $cat.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $cat;
     }
 
-    const addCategoryListener = (cat) => {
-        const $category = $categoryContainer.lastChild;
-        const $deletebtn = $category.lastChild;
+    const addCategoryListener = ($category) => {
+        const categoryName = getCategoryName($category);
+        const $deleteBtn = $category.lastChild;
 
-        $deletebtn.addEventListener('click', (e) => {
+        $deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            removeCategory($deletebtn.parentNode, cat.getName());
+            removeCategoryDOM($deleteBtn.parentNode);
         })
 
         $category.addEventListener('click', () => {
-            setActive($category, cat.getName());
+            setActive($category);
         })
     }
 
-    const setActive = ($category, categoryName) => {
+    const setActive = ($category) => {
         if ($currentActive) $currentActive.classList.remove('active');
             $category.classList.add('active');
             $currentActive = $category;
         
-        PubSub.publish('categoryActive', categoryName);
+        PubSub.publish('categoryActive', getCategoryName($category));
     }
 
-    const addCategory = (cat) => {
-        const $newCategory = newCategory(cat);
+    const addCategoryDOM = (category) => {
+        const $newCategory = newCategory(category);
         $categoryContainer.appendChild($newCategory);
-        addCategoryListener(cat);
-        setActive($newCategory, cat.getName());
+        addCategoryListener($newCategory);
+        setActive($newCategory);
     }
 
-    const removeCategory = ($category, categoryName) => {
+    const removeCategoryDOM = ($category) => {
+        if ($category == $currentActive) 
+            setActive($categoryContainer.firstElementChild);
         $category.remove();
-        PubSub.publish('removeCategory', categoryName);
+        PubSub.publish('removeCategory', getCategoryName($category));
     }
-
 
     /*
     Items UI
@@ -84,34 +94,55 @@ const UI = (() => {
 
     }
 
-    const addItemDOM = (item) => {
-        $itemContainer.appendChild(newItemDOM(item));
-        //addItemListener(item);
+    const addItemListener = ($item) => {
+        const itemElements = Array.from($item.children);
+        const itemContent = itemElements.find(el => el.classList.contains('text')).textContent;
+        const $deleteBtn = itemElements.find(el => el.classList.contains('delete'));
+        
+        $deleteBtn.addEventListener('click', () => {
+            removeItemDOM($deleteBtn.parentNode, itemContent);
+        })
     }
 
-    const removeItem = () => {
+    const addItemDOM = (item) => {
+        const $newItem = newItemDOM(item);
+        $itemContainer.appendChild($newItem);
+        addItemListener($newItem);
+    }
 
+    const removeItemDOM = ($item, itemContent) => {
+        $item.remove();
+        PubSub.publish('removeItem', {activeCategoryName: getCategoryName($currentActive), itemContent});
     }
 
     const init = () => {
+        // Categories
         $addCategoryBtn.addEventListener('click', () => {
             PubSub.publish('addCategory', prompt('Enter'));
         })
+        PubSub.subscribe('categoryAdded', addCategoryDOM);
 
+        // Items
         $addItemBtn.addEventListener('click', () => {
             const activeCategoryName = $currentActive.firstChild.textContent;
             const itemContent = prompt('Enter');
             PubSub.publish('addItem', {activeCategoryName, itemContent});
         })
-
-        PubSub.subscribe('categoryAdded', addCategory);
-
         PubSub.subscribe('categoryItemsLoaded', showItems);
         PubSub.subscribe('itemAdded', addItemDOM);
+        
+
+        //Defaults
+        PubSub.publish('addCategory', 'All');
+        PubSub.publish('addCategory', 'Random');
+        PubSub.publish('addCategory', 'Categories');
+
+        setActive($categoryContainer.firstElementChild);        
     }
 
     return {
         init,
+        setActive,
     };
 })();
 

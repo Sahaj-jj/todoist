@@ -2,8 +2,10 @@
 
 :root {
     --left-container: rgb(139, 165, 165);
+    --right-container: rgb(255, 255, 255);
     --active: orange;
     --hover: rgba(0,0,0,0.07);
+    --item-border: rgba(0, 0, 0, 0.11);
 }
 
 * {
@@ -48,7 +50,7 @@ body {
     background-color: var(--active);
 }
 
-.category .btn {
+.category .delete {
     color: rgb(112, 112, 112);
     font-size: 0.9em;
     transition: all 0.2s;
@@ -81,21 +83,22 @@ body {
 /* Items */
 
 .right-container {
-    background-color: beige;
+    background-color: var(--right-container);
     width: 80%;
 }
 
 .item-container {
     margin: 0px 100px 0px;
-    border-top: 1px solid var(--hover);
+    border-top: 1px solid var(--item-border);
 }
 
 .item {
     display: flex;
     justify-content: flex-start;
+    align-items: center;
     padding: 10px 30px;
     font-size: 0.85em;
-    border-bottom: 1px solid var(--hover);
+    border-bottom: 1px solid var(--item-border);
     gap: 10px;
 }
 
@@ -108,5 +111,9 @@ body {
     font-size: 1.5em;
     margin: 100px 100px 0;
     padding: 10px 30px;
+}
+
+.item .delete {
+    cursor: pointer;
 }
 

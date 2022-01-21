@@ -1,8 +1,8 @@
 import PubSub from "./pubsub";
 
-const Item = (id, content) => {
+const Item = (isDone, content) => {
     return {
-        id,
+        isDone,
         content,
     };
 }
@@ -14,20 +14,23 @@ const Category = (categoryName) => {
     const getName = () => name;
 
     const addItem = (itemContent) => {
-        const item = Item(0, itemContent);
+        const item = Item(false, itemContent);
         items.push(item);
         return item;
     }
 
-    // const removeItem = (item) => {
-    //     
-    // }
+    const removeItem = (itemContent) => {
+        const item = items.find(item => item.content === itemContent);
+        const index = items.indexOf(item);
+        items.splice(index, 1);
+    }
 
     const getItems = () => items;
 
     return {
         getName,
         addItem,
+        removeItem,
         getItems,
     };
 }
