@@ -23,6 +23,7 @@ const UI = (() => {
 
     const $categoryContainer = document.querySelector('.category-container');
     const $addCategoryBtn = document.querySelector('.add-category');
+    const $categoryInput = document.querySelector('.left-container .input-container');
     const $activeCategory = document.getElementById('active-category');
     let $currentActive = null;
 
@@ -70,6 +71,27 @@ const UI = (() => {
         $category.remove();
     }
 
+    const inputCategory = () => {
+        let $input, $okBtn, $cancelBtn;
+        [$input, $okBtn, $cancelBtn] = $categoryInput.children;
+
+        $categoryInput.style.display = 'flex';
+        $addCategoryBtn.style.display = 'none';
+        $input.value = '';
+        $input.focus();
+
+        $okBtn.addEventListener('click', () => {
+            PubSub.publish('addCategory', $input.value);
+            $categoryInput.style.display = 'none';
+            $addCategoryBtn.style.display = 'block';
+        }, {once: true});
+
+        $cancelBtn.addEventListener('click', () => {
+            $categoryInput.style.display = 'none';
+            $addCategoryBtn.style.display = 'block'
+        }, {once: true});
+    }
+
     /*
     Items UI
     */
@@ -87,9 +109,13 @@ const UI = (() => {
         }
         $item.appendChild($checkBox);
         $item.appendChild(createHtmlElement('div', ['text'], item.content));
-        if ($currentActive == $categoryContainer.firstElementChild) {
+
+        // Logic for showing tags in first category
+        if ($currentActive == $categoryContainer.firstElementChild
+            && getCategoryName($item) != getCategoryName($currentActive)) {
             $item.appendChild(createHtmlElement('div', ['tag'], getCategoryName($item)));
         }
+        
         $item.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $item;
     }
@@ -131,7 +157,7 @@ const UI = (() => {
     const init = () => {
         // Categories
         $addCategoryBtn.addEventListener('click', () => {
-            PubSub.publish('addCategory', prompt('Enter'));
+            inputCategory();
         })
         PubSub.subscribe('categoryAdded', addCategoryDOM);
 
