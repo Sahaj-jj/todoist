@@ -13,8 +13,8 @@ const UI = (() => {
         return element;
     }
 
-    const getCategoryName = ($category) => {
-        return $category.classList.value.split(' ')[0];
+    const getCategoryName = ($element) => {
+        return $element.classList.value.split(' ')[0];
     }
 
     /*
@@ -77,7 +77,7 @@ const UI = (() => {
     const $addItemBtn = document.querySelector('.add-item');
 
     const newItemDOM = (item) => {
-        const $item = createHtmlElement('div', ['item']);
+        const $item = createHtmlElement('div', [item.categoryName, 'item']);
         const $checkBox = document.createElement('input');
         $checkBox.type = 'checkbox';
         if (item.isDone) {
@@ -95,7 +95,6 @@ const UI = (() => {
             $itemContainer.lastChild.remove();  // Clear contents
 
         items.map(item => addItemDOM(item));
-
     }
 
     const addItemListener = ($item) => {
@@ -116,13 +115,13 @@ const UI = (() => {
 
     const removeItemDOM = ($item, itemContent) => {
         $item.remove();
-        PubSub.publish('removeItem', {activeCategoryName: getCategoryName($currentActive), itemContent});
+        PubSub.publish('removeItem', {categoryName: getCategoryName($item), itemContent});
     }
 
     const toggleDoneDOM = ($checkBox, itemContent) => {
         const $item = $checkBox.parentNode;
         $checkBox.checked ? $item.classList.add('done') : $item.classList.remove('done');
-        PubSub.publish('toggleDone', {activeCategoryName: getCategoryName($currentActive),itemContent, isDone: $checkBox.checked});
+        PubSub.publish('toggleDone', {categoryName: getCategoryName($item),itemContent, isDone: $checkBox.checked});
     } 
 
     const init = () => {
@@ -134,9 +133,9 @@ const UI = (() => {
 
         // Items
         $addItemBtn.addEventListener('click', () => {
-            const activeCategoryName = $currentActive.firstChild.textContent;
+            const categoryName = $currentActive.firstChild.textContent;
             const itemContent = prompt('Enter');
-            PubSub.publish('addItem', {activeCategoryName, itemContent});
+            PubSub.publish('addItem', {categoryName, itemContent});
         })
         PubSub.subscribe('categoryItemsLoaded', showItems);
         PubSub.subscribe('itemAdded', addItemDOM);

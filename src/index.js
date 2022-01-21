@@ -32,26 +32,23 @@ const CategoryController = (() => {
     const getItems = (categoryName) => {
         let items = [];
         if (categoryName === categories[0].getName()) {
-            categories.map(cat => {
-                //console.log(cat.getItems());
-                cat.getItems().map(item => items.push(item));
-            });
+            categories.map(cat => cat.getItems().map(item => items.push(item)));
         }
         else items = getCategory(categoryName).getItems();
         PubSub.publish('categoryItemsLoaded', items);
     }
 
-    const addItem = ({activeCategoryName, itemContent}) => {
-        const item = getCategory(activeCategoryName).addItem(itemContent); // Add to Home
+    const addItem = ({categoryName, itemContent}) => {
+        const item = getCategory(categoryName).addItem(itemContent, categoryName); // Add to Home
         PubSub.publish('itemAdded', item);
     }
 
-    const removeItem = ({activeCategoryName, itemContent}) => {
-        getCategory(activeCategoryName).removeItem(itemContent);
+    const removeItem = ({categoryName, itemContent}) => {
+        getCategory(categoryName).removeItem(itemContent);
     }
 
-    const toggleDone = ({activeCategoryName, itemContent}) => {
-        getCategory(activeCategoryName).toggleDone(itemContent);
+    const toggleDone = ({categoryName, itemContent}) => {
+        getCategory(categoryName).toggleDone(itemContent);
     }
 
     const init = () => {
