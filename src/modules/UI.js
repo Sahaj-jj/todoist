@@ -1,4 +1,4 @@
-import { format, compareAsc, parseISO } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import PubSub from "./pubsub";
 import Storage from './storage';
 
@@ -239,7 +239,6 @@ const UI = (() => {
         $addItemBtn.addEventListener('click', inputItem)
         PubSub.subscribe('categoryItemsLoaded', showItems);
 
-        localStorage.clear();
         if (localStorage.length == 0) Storage.loadSample();
         const categoryNames = Storage.getCategories();
         categoryNames.forEach(cat => {
