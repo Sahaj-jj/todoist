@@ -112,8 +112,9 @@ const UI = (() => {
             && getCategoryName($item) != getCategoryName($currentActive)) {
             $item.appendChild(createHtmlElement('div', ['tag'], getCategoryName($item)));
         }
-        
+        $item.appendChild(createHtmlElement('p', ['empty']));
         $item.appendChild(createHtmlElement('div', ['date'], format(parseISO(item.date), 'dd MMM yy')));
+        $item.appendChild(createHtmlElement('div', ['edit', 'btn'], 'edit'));
         $item.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $item;
     }
@@ -128,11 +129,14 @@ const UI = (() => {
     const addItemListener = ($item) => {
         const itemElements = Array.from($item.children);
         const itemContent = itemElements.find(el => el.classList.contains('text')).textContent;
+        const itemDate = itemElements.find(el => el.classList.contains('date')).textContent;
         const $deleteBtn = itemElements.find(el => el.classList.contains('delete'));
         const $checkBox = itemElements.find(el => el.type == 'checkbox');
+        const $editBtn = itemElements.find(el => el.classList.contains('edit'));
         
         $deleteBtn.addEventListener('click', () => removeItemDOM($item, itemContent));
         $checkBox.addEventListener('click', () => toggleDoneDOM($checkBox, itemContent));
+        $editBtn.addEventListener('click', () => inputItem({isEdit: true, $item, itemContent}));
     }
 
     const addItemDOM = (item) => {
@@ -152,9 +156,10 @@ const UI = (() => {
         PubSub.publish('toggleDone', {categoryName: getCategoryName($item),itemContent, isDone: $checkBox.checked});
     } 
 
-    const inputItem = () => {
+    const inputItem = ({isEdit, $item, itemContent}) => {
+        // if (isEdit) $item.style.display = 'none';
         $addItemBtn.style.display = 'none';
-        const categoryName = $currentActive.firstChild.textContent;
+        let categoryName = $currentActive.firstChild.textContent;
         const $textInput = createHtmlElement('input', ['text-input']);
         $textInput.type = 'text';
         $textInput.placeholder = 'Add task';
@@ -173,6 +178,11 @@ const UI = (() => {
         $inputContainer.appendChild($cancelBtn);
         $itemContainer.appendChild($inputContainer);
 
+        if (isEdit) {
+            categoryName = getCategoryName($item);
+            $textInput.placeholder = itemContent;
+        }
+
         const reset = () => {
             $inputContainer.remove();
             $textInput.value = '';
@@ -180,7 +190,17 @@ const UI = (() => {
         }
         $textInput.focus();
         $okBtn.addEventListener('click', () => {
-            PubSub.publish('addItem', {categoryName, itemContent: $textInput.value, itemDate: $dateInput.value});
+            if (isEdit) {
+                const item = {
+                    isDone: false,
+                    categoryName: getCategoryName($item),
+                    content: $textInput.value,
+                    date: $dateInput.value
+                };
+                $item.replaceWith(newItemDOM(item));
+                PubSub.publish('editItem', [itemContent, item]);
+            }
+            else PubSub.publish('addItem', {categoryName, itemContent: $textInput.value, itemDate: $dateInput.value});
             reset();
         })
         $cancelBtn.addEventListener('click', reset);
@@ -197,7 +217,6 @@ const UI = (() => {
         $addItemBtn.addEventListener('click', inputItem)
         PubSub.subscribe('categoryItemsLoaded', showItems);
         PubSub.subscribe('itemAdded', addItemDOM);
-        
 
         //Defaults
         PubSub.publish('addCategory', 'All');

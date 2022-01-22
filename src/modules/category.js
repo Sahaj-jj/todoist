@@ -24,10 +24,14 @@ const Category = (categoryName) => {
 
     const removeItem = (itemContent) => {
         const item = _getItem(itemContent);
-        if (item == undefined) return null;
         const index = items.indexOf(item);
         items.splice(index, 1);
-        return item;
+    }
+
+    const editItem = (itemContent, newItemContent, newItemDate) => {
+        const item = _getItem(itemContent);
+        item.date = newItemDate;
+        item.content = newItemContent;
     }
 
     const toggleDone = (itemContent) => {
@@ -41,6 +45,7 @@ const Category = (categoryName) => {
         getName,
         addItem,
         removeItem,
+        editItem,
         toggleDone,
         getItems,
     };

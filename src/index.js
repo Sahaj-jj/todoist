@@ -52,12 +52,17 @@ const CategoryController = (() => {
         getCategory(categoryName).toggleDone(itemContent);
     }
 
+    const editItem = ([itemContent, item]) => {
+        getCategory(item.categoryName).editItem(itemContent, item.content, item.date);
+    }
+
     const init = () => {
         PubSub.subscribe('addCategory', addCategory);
         PubSub.subscribe('removeCategory', removeCategory);
 
         PubSub.subscribe('categoryActive', getItems);
         PubSub.subscribe('addItem', addItem);
+        PubSub.subscribe('editItem', editItem);
         PubSub.subscribe('removeItem', removeItem);
         PubSub.subscribe('toggleDone', toggleDone);
     }

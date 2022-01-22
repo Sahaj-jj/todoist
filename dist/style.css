@@ -172,17 +172,15 @@ body {
     padding: 10px 30px;
 }
 
-.item .delete, .item .date {
-    cursor: pointer;
-    position: absolute;
-    right: 0;
+.item .empty {
+    flex-grow: 1;
 }
 
-
-.item .date {
-    margin-right: 30px;
+.item .delete, .item .date, .item .edit {
+    cursor: pointer;
     font-size: 0.8em;
 }
+
 
 .item-input-container input {
     background-color: var(--right-container);
