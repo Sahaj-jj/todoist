@@ -98,7 +98,7 @@ const UI = (() => {
     const $itemContainer = document.querySelector('.item-container');
     const $addItemBtn = document.querySelector('.add-item');
 
-    const newItemDOM = (item) => {
+    const newItemDOM = (item, isEdit = false) => {
         const $item = createHtmlElement('div', [item.categoryName, 'item']);
         const $checkBox = document.createElement('input');
         $checkBox.type = 'checkbox';
@@ -119,8 +119,10 @@ const UI = (() => {
         $item.appendChild(createHtmlElement('div', ['edit', 'btn', 'fa', 'fa-pencil']));
         $item.appendChild(createHtmlElement('div', ['delete', 'btn', 'fa', 'fa-times-circle']));
 
-        $itemContainer.appendChild($item);
         addItemListener($item);
+
+        if (isEdit) return $item;
+        $itemContainer.appendChild($item);
     }
 
     const showItems = (items) => {
@@ -166,14 +168,13 @@ const UI = (() => {
     } 
 
     const editItemDOM = ($item, itemContent, newContent, newDate) => {
-        $item.style.display = 'none';
         const item = {
             isDone: $item.classList.contains('done'),
             categoryName: getCategoryName($item),
             content: newContent,
             date: newDate,
         };
-        newItemDOM(item);
+        $item.replaceWith(newItemDOM(item, true));
         PubSub.publish('editItem', [itemContent, item]);
     }
 
@@ -196,7 +197,6 @@ const UI = (() => {
         $inputContainer.appendChild($dateInput);
         $inputContainer.appendChild($okBtn);
         $inputContainer.appendChild($cancelBtn);
-        $itemContainer.appendChild($inputContainer);
 
         $textInput.focus();
 
@@ -207,6 +207,8 @@ const UI = (() => {
         }
 
         if (isEdit){
+            $itemContainer.insertBefore($inputContainer, $item);
+            $item.style.display = 'none';
             $textInput.placeholder = itemContent;
             $okBtn.addEventListener('click', () => {
                 editItemDOM($item, itemContent, $textInput.value, $dateInput.value);
@@ -214,6 +216,7 @@ const UI = (() => {
             });
         }
         else {
+            $itemContainer.appendChild($inputContainer);
             $okBtn.addEventListener('click', () => {
                 addItemDOM($textInput.value, $dateInput.value);
                 reset();

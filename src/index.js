@@ -28,6 +28,7 @@ const CategoryController = (() => {
         const index = categories.indexOf(getCategory(categoryName));
         categories.splice(index, 1);
         Storage.saveCategories(categories.map(cat => cat.getName()));
+        localStorage.removeItem(categoryName);
     }
 
     // Items
