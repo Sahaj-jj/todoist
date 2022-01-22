@@ -1,6 +1,7 @@
 import PubSub from "./modules/pubsub";
 import UI from "./modules/UI";
-import Category from "./modules/category"
+import { Category } from "./modules/category"
+import Storage from "./modules/storage";
 
 const CategoryController = (() => {
 
@@ -13,25 +14,26 @@ const CategoryController = (() => {
     }
     
     const addCategory = (categoryName) => {
-        console.log(categoryName);
         if (getCategory(categoryName)) {
             alert('This category already exists!');
             return;
         }
         const cat = Category(categoryName);
         categories.push(cat);
-        PubSub.publish('categoryAdded', cat);
+        Storage.saveCategories(categories.map(cat => cat.getName()));
+        cat.loadItems();
     }
 
     const removeCategory = (categoryName) => {
         const index = categories.indexOf(getCategory(categoryName));
         categories.splice(index, 1);
+        Storage.saveCategories(categories.map(cat => cat.getName()));
     }
 
     // Items
 
     const getItems = (categoryName) => {
-        let items = [];
+       let items = [];
         if (categoryName === categories[0].getName()) {
             categories.map(cat => cat.getItems().map(item => items.push(item)));
         }
@@ -39,9 +41,8 @@ const CategoryController = (() => {
         PubSub.publish('categoryItemsLoaded', items);
     }
 
-    const addItem = ({categoryName, itemContent, itemDate}) => {
-        const item = getCategory(categoryName).addItem(itemContent, itemDate, categoryName); // Add to Home
-        PubSub.publish('itemAdded', item);
+    const addItem = (item) => {
+        getCategory(item.categoryName).addItem(item.content, item.date, item.categoryName);
     }
 
     const removeItem = ({categoryName, itemContent}) => {
@@ -75,7 +76,9 @@ const CategoryController = (() => {
 CategoryController.init();
 UI.init();
 
-// console.log(format(new Date(), "dd MMM"));
+
+
+
 
 
 

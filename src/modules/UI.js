@@ -1,5 +1,6 @@
 import { format, compareAsc, parseISO } from 'date-fns'
 import PubSub from "./pubsub";
+import Storage from './storage';
 
 const UI = (() => {
 
@@ -30,9 +31,9 @@ const UI = (() => {
     const $activeCategory = document.getElementById('active-category');
     let $currentActive = null;
 
-    const newCategory = (category) => {
-        const $cat = createHtmlElement('div', [category.getName(), 'category']);
-        $cat.appendChild(createHtmlElement('div', ['text'], category.getName()));
+    const newCategory = (categoryName) => {
+        const $cat = createHtmlElement('div', [categoryName, 'category']);
+        $cat.appendChild(createHtmlElement('div', ['text'], categoryName));
         if ($categoryContainer.childElementCount != 0)
             $cat.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
         return $cat;
@@ -59,10 +60,11 @@ const UI = (() => {
         PubSub.publish('categoryActive', categoryName);
     }
 
-    const addCategoryDOM = (category) => {
-        const $newCategory = newCategory(category);
+    const addCategoryDOM = (categoryName) => {
+        const $newCategory = newCategory(categoryName);
         $categoryContainer.appendChild($newCategory);
         addCategoryListener($newCategory);
+        PubSub.publish('addCategory', categoryName);
         setActive($newCategory);
     }
 
@@ -81,7 +83,7 @@ const UI = (() => {
         $input.focus();
     }
     const loadInput = () => {
-        PubSub.publish('addCategory', $input.value);
+        addCategoryDOM($input.value);
         resetInput();
     }
     const resetInput = () => {
@@ -114,16 +116,18 @@ const UI = (() => {
         }
         $item.appendChild(createHtmlElement('p', ['empty']));
         $item.appendChild(createHtmlElement('div', ['date'], format(parseISO(item.date), 'dd MMM yy')));
-        $item.appendChild(createHtmlElement('div', ['edit', 'btn'], 'edit'));
-        $item.appendChild(createHtmlElement('div', ['delete', 'btn'], 'x'));
-        return $item;
+        $item.appendChild(createHtmlElement('div', ['edit', 'btn', 'fa', 'fa-pencil']));
+        $item.appendChild(createHtmlElement('div', ['delete', 'btn', 'fa', 'fa-times-circle']));
+
+        $itemContainer.appendChild($item);
+        addItemListener($item);
     }
 
     const showItems = (items) => {
         while($itemContainer.childElementCount > 0) 
             $itemContainer.lastChild.remove();  // Clear contents
 
-        items.map(item => addItemDOM(item));
+        items.map(item => newItemDOM(item));
     }
 
     const addItemListener = ($item) => {
@@ -139,10 +143,15 @@ const UI = (() => {
         $editBtn.addEventListener('click', () => inputItem({isEdit: true, $item, itemContent}));
     }
 
-    const addItemDOM = (item) => {
-        const $newItem = newItemDOM(item);
-        $itemContainer.appendChild($newItem);
-        addItemListener($newItem);
+    const addItemDOM = (newContent, newDate) => {
+        const item = {
+            isDone: false,
+            categoryName: getCategoryName($currentActive),
+            content: newContent,
+            date: newDate,
+        };
+        newItemDOM(item);
+        PubSub.publish('addItem', item);
     }
 
     const removeItemDOM = ($item, itemContent) => {
@@ -156,8 +165,19 @@ const UI = (() => {
         PubSub.publish('toggleDone', {categoryName: getCategoryName($item),itemContent, isDone: $checkBox.checked});
     } 
 
+    const editItemDOM = ($item, itemContent, newContent, newDate) => {
+        $item.style.display = 'none';
+        const item = {
+            isDone: $item.classList.contains('done'),
+            categoryName: getCategoryName($item),
+            content: newContent,
+            date: newDate,
+        };
+        newItemDOM(item);
+        PubSub.publish('editItem', [itemContent, item]);
+    }
+
     const inputItem = ({isEdit, $item, itemContent}) => {
-        // if (isEdit) $item.style.display = 'none';
         $addItemBtn.style.display = 'none';
         let categoryName = $currentActive.firstChild.textContent;
         const $textInput = createHtmlElement('input', ['text-input']);
@@ -178,52 +198,51 @@ const UI = (() => {
         $inputContainer.appendChild($cancelBtn);
         $itemContainer.appendChild($inputContainer);
 
-        if (isEdit) {
-            categoryName = getCategoryName($item);
-            $textInput.placeholder = itemContent;
-        }
+        $textInput.focus();
 
         const reset = () => {
             $inputContainer.remove();
             $textInput.value = '';
             $addItemBtn.style.display = 'block';
         }
-        $textInput.focus();
-        $okBtn.addEventListener('click', () => {
-            if (isEdit) {
-                const item = {
-                    isDone: false,
-                    categoryName: getCategoryName($item),
-                    content: $textInput.value,
-                    date: $dateInput.value
-                };
-                const $newItem = newItemDOM(item);
-                $item.replaceWith($newItem);
-                addItemListener($newItem);
-                PubSub.publish('editItem', [itemContent, item]);
-            }
-            else PubSub.publish('addItem', {categoryName, itemContent: $textInput.value, itemDate: $dateInput.value});
+
+        if (isEdit){
+            $textInput.placeholder = itemContent;
+            $okBtn.addEventListener('click', () => {
+                editItemDOM($item, itemContent, $textInput.value, $dateInput.value);
+                reset();
+            });
+        }
+        else {
+            $okBtn.addEventListener('click', () => {
+                addItemDOM($textInput.value, $dateInput.value);
+                reset();
+            });
+            
+        }
+        $cancelBtn.addEventListener('click', () => {
             reset();
-        })
-        $cancelBtn.addEventListener('click', reset);
+            $item.style.display = 'flex';
+        });
+
     }
 
     const init = () => {
         // Categories
         $addCategoryBtn.addEventListener('click', inputCategory);
-        PubSub.subscribe('categoryAdded', addCategoryDOM);
+        // PubSub.subscribe('categoryAdded', addCategoryDOM);
         $okBtn.addEventListener('click', loadInput);
         $cancelBtn.addEventListener('click', resetInput);
 
         // Items
         $addItemBtn.addEventListener('click', inputItem)
         PubSub.subscribe('categoryItemsLoaded', showItems);
-        PubSub.subscribe('itemAdded', addItemDOM);
 
-        //Defaults
-        PubSub.publish('addCategory', 'All');
-        PubSub.publish('addCategory', 'Random');
-        PubSub.publish('addCategory', 'Categories');
+        //localStorage.clear();
+        const categoryNames = Storage.getCategories();
+        categoryNames.forEach(cat => {
+            addCategoryDOM(cat);
+        });
 
         setActive($categoryContainer.firstElementChild);        
     }
