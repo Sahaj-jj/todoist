@@ -16,7 +16,7 @@ A todo list organizer with categories
 Made while following the curriculum of [The Odin Project](https://www.theodinproject.com/)
 <br>
 Tools
--HTML5
+- HTML5
 - CSS3
 - vanilla JS
 - Webpack
