@@ -197,7 +197,9 @@ const UI = (() => {
                     content: $textInput.value,
                     date: $dateInput.value
                 };
-                $item.replaceWith(newItemDOM(item));
+                const $newItem = newItemDOM(item);
+                $item.replaceWith($newItem);
+                addItemListener($newItem);
                 PubSub.publish('editItem', [itemContent, item]);
             }
             else PubSub.publish('addItem', {categoryName, itemContent: $textInput.value, itemDate: $dateInput.value});
