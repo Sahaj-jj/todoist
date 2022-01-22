@@ -117,9 +117,9 @@ const UI = (() => {
         $item.appendChild(createHtmlElement('p', ['empty']));
         $item.appendChild(createHtmlElement('div', ['date'], format(parseISO(item.date), 'dd MMM yy')));
         $item.appendChild(createHtmlElement('div', ['edit', 'btn', 'fa', 'fa-pencil']));
-        $item.appendChild(createHtmlElement('div', ['delete', 'btn', 'fa', 'fa-times-circle']));
+        $item.appendChild(createHtmlElement('div', ['delete', 'btn', 'fa', 'fa-trash-o']));
 
-        addItemListener($item);
+        addItemListener($item, item);
 
         if (isEdit) return $item;
         $itemContainer.appendChild($item);
@@ -132,22 +132,22 @@ const UI = (() => {
         items.map(item => newItemDOM(item));
     }
 
-    const addItemListener = ($item) => {
+    const addItemListener = ($item, item) => {
         const itemElements = Array.from($item.children);
-        const itemContent = itemElements.find(el => el.classList.contains('text')).textContent;
-        const itemDate = itemElements.find(el => el.classList.contains('date')).textContent;
+        const itemContent = item.content;
+        const itemDate = item.date;
         const $deleteBtn = itemElements.find(el => el.classList.contains('delete'));
         const $checkBox = itemElements.find(el => el.type == 'checkbox');
         const $editBtn = itemElements.find(el => el.classList.contains('edit'));
         
         $deleteBtn.addEventListener('click', () => removeItemDOM($item, itemContent));
         $checkBox.addEventListener('click', () => toggleDoneDOM($checkBox, itemContent));
-        $editBtn.addEventListener('click', () => inputItem({isEdit: true, $item, itemContent}));
+        $editBtn.addEventListener('click', () => inputItem({isEdit: true, $item, itemContent, itemDate}));
     }
 
-    const addItemDOM = (newContent, newDate) => {
+    const addItemDOM = (newContent, newDate, isDone = false) => {
         const item = {
-            isDone: false,
+            isDone: isDone,
             categoryName: getCategoryName($currentActive),
             content: newContent,
             date: newDate,
@@ -178,27 +178,22 @@ const UI = (() => {
         PubSub.publish('editItem', [itemContent, item]);
     }
 
-    const inputItem = ({isEdit, $item, itemContent}) => {
+    const inputItem = ({isEdit, $item, itemContent, itemDate}) => {
         $addItemBtn.style.display = 'none';
-        let categoryName = $currentActive.firstChild.textContent;
         const $textInput = createHtmlElement('input', ['text-input']);
         $textInput.type = 'text';
-        $textInput.placeholder = 'Add task';
-        $textInput.required = true;
 
         const $dateInput = createHtmlElement('input', ['date-input']);
         $dateInput.type = 'date';
 
-        const $okBtn = createHtmlElement('div', ['ok', 'button'], 'K');
-        const $cancelBtn = createHtmlElement('div', ['cancel', 'button'], 'X');
+        const $okBtn = createHtmlElement('div', ['ok', 'button', 'fa', 'fa-check-circle']);
+        const $cancelBtn = createHtmlElement('div', ['cancel', 'button', 'fa', 'fa-times-circle']);
         const $inputContainer = createHtmlElement('div', ['item-input-container']);
         
         $inputContainer.appendChild($textInput);
         $inputContainer.appendChild($dateInput);
         $inputContainer.appendChild($okBtn);
         $inputContainer.appendChild($cancelBtn);
-
-        $textInput.focus();
 
         const reset = () => {
             $inputContainer.remove();
@@ -209,13 +204,16 @@ const UI = (() => {
         if (isEdit){
             $itemContainer.insertBefore($inputContainer, $item);
             $item.style.display = 'none';
-            $textInput.placeholder = itemContent;
+            $textInput.value = itemContent;
+            $dateInput.defaultValue = itemDate;
             $okBtn.addEventListener('click', () => {
                 editItemDOM($item, itemContent, $textInput.value, $dateInput.value);
                 reset();
             });
         }
         else {
+            $textInput.placeholder = 'Add task';
+            $dateInput.defaultValue = format(new Date(), 'yyyy-MM-dd');
             $itemContainer.appendChild($inputContainer);
             $okBtn.addEventListener('click', () => {
                 addItemDOM($textInput.value, $dateInput.value);
@@ -223,9 +221,10 @@ const UI = (() => {
             });
             
         }
+        $textInput.focus();
         $cancelBtn.addEventListener('click', () => {
             reset();
-            $item.style.display = 'flex';
+            if (isEdit) $item.style.display = 'flex';
         });
 
     }
@@ -233,7 +232,6 @@ const UI = (() => {
     const init = () => {
         // Categories
         $addCategoryBtn.addEventListener('click', inputCategory);
-        // PubSub.subscribe('categoryAdded', addCategoryDOM);
         $okBtn.addEventListener('click', loadInput);
         $cancelBtn.addEventListener('click', resetInput);
 
@@ -241,7 +239,8 @@ const UI = (() => {
         $addItemBtn.addEventListener('click', inputItem)
         PubSub.subscribe('categoryItemsLoaded', showItems);
 
-        //localStorage.clear();
+        localStorage.clear();
+        if (localStorage.length == 0) Storage.loadSample();
         const categoryNames = Storage.getCategories();
         categoryNames.forEach(cat => {
             addCategoryDOM(cat);
