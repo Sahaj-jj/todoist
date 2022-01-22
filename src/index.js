@@ -39,8 +39,8 @@ const CategoryController = (() => {
         PubSub.publish('categoryItemsLoaded', items);
     }
 
-    const addItem = ({categoryName, itemContent}) => {
-        const item = getCategory(categoryName).addItem(itemContent, categoryName); // Add to Home
+    const addItem = ({categoryName, itemContent, itemDate}) => {
+        const item = getCategory(categoryName).addItem(itemContent, itemDate, categoryName); // Add to Home
         PubSub.publish('itemAdded', item);
     }
 
@@ -69,6 +69,8 @@ const CategoryController = (() => {
 
 CategoryController.init();
 UI.init();
+
+// console.log(format(new Date(), "dd MMM"));
 
 
 

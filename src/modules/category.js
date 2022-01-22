@@ -1,9 +1,10 @@
 import PubSub from "./pubsub";
 
-const Item = (isDone, content, categoryName) => {
+const Item = (isDone, content, date, categoryName) => {
     return {
         isDone,
         content,
+        date,
         categoryName,
     };
 }
@@ -15,8 +16,8 @@ const Category = (categoryName) => {
     const _getItem = (itemContent) =>  items.find(item => item.content === itemContent);
     const getName = () => name;
 
-    const addItem = (itemContent, categoryName) => {
-        const item = Item(false, itemContent, categoryName);
+    const addItem = (itemContent, itemDate, categoryName) => {
+        const item = Item(false, itemContent, itemDate, categoryName);
         items.push(item);
         return item;
     }
