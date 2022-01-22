@@ -135,15 +135,15 @@ body {
 }
 
 .item-container {
-    
+    margin-top: 30px;
     border-top: 1px solid var(--item-border);
 }
 
-.item {
+.item, .item-input-container {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    padding: 10px 30px;
+    padding: 10px 0;
     font-size: 0.85em;
     border-bottom: 1px solid var(--item-border);
     gap: 18px;
@@ -168,14 +168,47 @@ body {
 
 .add-item {
     cursor: pointer;
-    font-size: 1.5em;
-    margin-top: 30px;
+    font-size: 1em;
     padding: 10px 30px;
 }
 
-.item .delete {
+.item .delete, .item .date {
     cursor: pointer;
     position: absolute;
     right: 0;
+}
+
+
+.item .date {
+    margin-right: 30px;
+    font-size: 0.8em;
+}
+
+.item-input-container input {
+    background-color: var(--right-container);
+    color: var(--title);
+    cursor: pointer;
+    outline: none;
+}
+
+.item-input-container input[type="text"] {
+    border: none;
+    flex: 1;
+}
+
+input[type="date"] {
+    padding: 5px 10px;
+    border: 1px solid var(--active);
+    border-radius: 10px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(100%);
+}
+
+.item-input-container .button {
+    color: var(--active);
+    cursor: pointer;
 }
 
