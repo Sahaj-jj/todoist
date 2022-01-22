@@ -13,8 +13,11 @@ A todo list organizer with categories
 - Add dates to each task
 
 #
-Made using HTML5, CSS3, vanilla JS.
+Made while following the curriculum of [The Odin Project](https://www.theodinproject.com/)
 <br>
-Additional tools
+Tools
+-HTML5
+- CSS3
+- vanilla JS
 - Webpack
 - date-fns (library)
