@@ -239,7 +239,9 @@ const UI = (() => {
         $addItemBtn.addEventListener('click', inputItem)
         PubSub.subscribe('categoryItemsLoaded', showItems);
 
-        if (localStorage.length == 0) Storage.loadSample();
+        if (localStorage.length == 0) {
+            Storage.loadSample()
+        };
         const categoryNames = Storage.getCategories();
         categoryNames.forEach(cat => {
             addCategoryDOM(cat);
@@ -254,6 +256,5 @@ const UI = (() => {
 })();
 
 export default UI;
-
 
 
